@@ -9,7 +9,9 @@ const ControlArea = (props: {
   tables: Array<string>,
   fields: Array<string>,
   count: number,
+  totalCount: number,
   mode: string,
+  goButton: boolean,
   selectTable: (() => Event),
   selectField: (() => Event),
   newQuery: (() => Event),
@@ -41,10 +43,10 @@ const ControlArea = (props: {
               ))
               }
             </select>
-            <button onClick={props.newQuery}>Go</button>
+            <button onClick={props.newQuery}>{props.goButton ? 'Go' : 'More'}</button>
           </h4>
           <div>
-            {props.count} rows returned
+            <p>showing {props.count}/{props.totalCount} records</p>
         </div>
         </div>) : ''}
       <div>

@@ -3,8 +3,12 @@
 const express = require('express');
 const router = express.Router();
 const redis = require('promise-redis')();
-const client = redis.createClient();
 const find = require('../app/PTABfind.js');
+const config = require('../app/config.json');
+
+const client = redis.createClient({
+  host: config.database.server
+})
 
 find.setClient(client);
 
@@ -42,6 +46,15 @@ router.get('/survival', function (req, res, next) {
     res.json(result)
   })
   .catch(err => console.error(err))
+})
+
+router.get('/multiedit', (req, res, next) => {
+  // applies a change to the existing recordset
+  console.log(req.body);
+  req.json()
+  // pass the json request body as the first argument,
+  // the field as second argument
+  // the newValue as third argument
 })
 
 module.exports = router;

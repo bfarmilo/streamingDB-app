@@ -1,6 +1,9 @@
 const redis = require('promise-redis')();
+const config = require('./config.json');
 
-const client = redis.createClient();
+const client = redis.createClient({
+  host: config.database.server
+});
 
 client.on('connect', () => console.log('connected'));
 client.on('error', err => console.log(err));

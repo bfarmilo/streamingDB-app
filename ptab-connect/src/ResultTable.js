@@ -33,7 +33,7 @@ const ResultTable = (props: {
               <td>{record.FWDStatus}</td>
               <td>{record.Petitioner}</td>
               <td>{record.PatentOwner}</td>
-              <td>{record.Patent}:{record.Claim}</td>
+              <td>{record.Patent} Clm {record.Claim}</td>
               <td>{record.MainUSPC}</td>
               <td>{record.Instituted ? 'x' : ''}</td>
               <td>{record.Invalid ? 'x' : ''}</td>

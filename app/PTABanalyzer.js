@@ -1,4 +1,16 @@
-let client;
+const redis = require('promise-redis')();
+const dataSet = require('../public/javascripts/1216-RP-10452 - claimdata.json').claimData;
+
+const config = require('./config.json');
+
+const client = redis.createClient({
+  host: config.database.server
+});
+
+client.on('error', err => {
+  console.log(err);
+  client.quit();
+});
 
 const deDuplicate = (callback) => {
   client.sinter('survival:killed', 'survival:impaired', (err1, data1) => {
@@ -101,20 +113,12 @@ const survivalAnalysis = () => {
     .catch(err => Promise.reject(err))
 }
 
-const test = () => {
-  survivalAnalysis()
-    .then(done => {
-      deDuplicate((err2, data) => {
-        survivalAnalysis((err3, done2) => {
-          client.quit();
-        })
-      });
-    })
-    .catch(err => console.error(err));
-}
-
-const pauseForTest = 9;
-
-module.exports = {
-  survivalAnalysis
-}
+survivalAnalysis()
+  .then(done => {
+    deDuplicate((err2, data) => {
+      survivalAnalysis((err3, done2) => {
+        client.quit();
+      })
+    });
+  })
+  .catch(err => console.error(err));

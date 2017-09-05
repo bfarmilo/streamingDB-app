@@ -1,7 +1,10 @@
 const redis = require('promise-redis')();
 const dataSet = require('../public/javascripts/1216-RP-10452 - claimdata.json').claimData;
+const config = require('./config.json');
 
-const client = redis.createClient();
+const client = redis.createClient({
+  host: config.database.server
+});
 
 client.on('error', err => {
   console.log(err);
@@ -31,7 +34,7 @@ const initDB = (callback) => {
   client.sadd(['fieldList'].concat(Object.keys(dataSet[0])));
 
   //push list of searchable tables
-  client.sadd(['searchable', 'killed:300', 'killed:700', 'killed:electronics', 'temp:killed', 'temp:unpat', 'temp:unpat_claim']);
+  client.sadd(['searchable', 'all', 'killed:300', 'killed:700', 'killed:electronics', 'temp:killed', 'temp:unpat', 'temp:unpat_claim']);
 
   // hash of JSON data
   let index = 0;

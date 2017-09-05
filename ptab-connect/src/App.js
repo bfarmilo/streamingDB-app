@@ -15,10 +15,12 @@ class App extends Component {
     fields: [],
     tables: [],
     count: 0,
+    totalCount: 0,
     totalClaims: 0,
     uniqueClaims: 0,
     survival: [],
     mode: 'chart',
+    goButton: true,
     cursor: 0
   }
 
@@ -32,7 +34,7 @@ class App extends Component {
     fetch(`/users/run?field=${this.state.field}&value=${this.state.value}&cursor=${this.state.cursor}&table=${encodeURIComponent(this.state.table)}`)
       .then(res => res.json())
       .then(records => {
-        this.setState({ cursor: records.cursor, count: records.count, records: records.data })
+        this.setState({ cursor: records.cursor, count: records.count, records: records.data, totalCount: records.totalCount })
       })
     fetch('/users/survival')
       .then(res => res.json())
@@ -47,27 +49,35 @@ class App extends Component {
 
   selectTable = (event) => {
     console.log('new table selected %s', event.target.value);
-    this.setState({ table: event.target.value });
+    this.setState({ table: event.target.value, goButton: true});
   }
 
   selectField = (event) => {
     console.log('new field selected %s', event.target.value);
-    this.setState({ field: event.target.value });
+    this.setState({ field: event.target.value, goButton: true });
   }
 
   setValue = (event) => {
     console.log('new value %s', event.target.value);
-    this.setState({ value: event.target.value });
+    this.setState({ value: event.target.value, goButton: true });
   }
 
   newQuery = () => {
+    const cursor = this.state.goButton ? 0 : this.state.cursor;
     console.log('request for new query of %s where %s=%s', this.state.table, this.state.field, this.state.value)
-    fetch(`/users/run?field=${this.state.field}&value=${this.state.value}&table=${encodeURIComponent(this.state.table)}`)
+    fetch(`/users/run?field=${this.state.field}&value=${this.state.value}&cursor=${cursor}&table=${encodeURIComponent(this.state.table)}`)
       .then(res => res.json())
       .then(records => {
-        this.setState({ count: records.count, records: records.data })
-      })
-
+        this.setState(oldState => {
+          return { 
+            count: oldState.goButton ? records.count : oldState.count + records.count,
+            totalCount: records.totalCount,
+            records: oldState.goButton ? records.data : oldState.records.concat(records.data),
+            cursor: records.cursor,
+            goButton: records.cursor === 0
+          }
+        });
+      });
   }
 
   switchMode = () => {
@@ -90,12 +100,14 @@ class App extends Component {
           table={this.state.table}
           field={this.state.field}
           count={this.state.count}
+          totalCount={this.state.totalCount}
           mode={this.state.mode}
           selectTable={this.selectTable}
           selectField={this.selectField}
           newQuery={this.newQuery}
           setValue={this.setValue}
           switchMode={this.switchMode}
+          goButton={this.state.goButton}
         />
         {viewArea}
       </div>
