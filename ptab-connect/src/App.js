@@ -21,7 +21,8 @@ class App extends Component {
     survival: [],
     mode: 'chart',
     goButton: true,
-    cursor: 0
+    cursor: 0,
+    detailTable: 'out:i_w'
   }
 
   componentDidMount() {
@@ -47,6 +48,11 @@ class App extends Component {
       })
   }
 
+  setDetailTable = (event) => {
+    console.log('new detail table selected %s', event.target.value);
+    this.setState({ detailTable: event.target.value });
+  }
+
   selectTable = (event) => {
     console.log('new table selected %s', event.target.value);
     this.setState({ table: event.target.value, goButton: true});
@@ -60,6 +66,11 @@ class App extends Component {
   setValue = (event) => {
     console.log('new value %s', event.target.value);
     this.setState({ value: event.target.value, goButton: true });
+  }
+
+  getDetailTable = () => {
+    fetch(`/users/survivaldetail?table=${encodeURIComponent(this.state.detailTable)}`)
+    .then(result => console.log(result))
   }
 
   newQuery = () => {
@@ -108,6 +119,9 @@ class App extends Component {
           setValue={this.setValue}
           switchMode={this.switchMode}
           goButton={this.state.goButton}
+          detailTable={this.state.detailTable}
+          setDetailTable={this.setDetailTable}
+          getDetailTable={this.getDetailTable}
         />
         {viewArea}
       </div>

@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "set PORT=3001 && node ./bin/www"
+    "start": "set PORT=3001 && node ./bin/www",
+    "resetDB": "node ./app/PTABredis.js"
   },
   "dependencies": {
     "body-parser": "~1.17.1",

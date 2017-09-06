@@ -12,11 +12,13 @@ const ControlArea = (props: {
   totalCount: number,
   mode: string,
   goButton: boolean,
+  detailTable: string,
   selectTable: (() => Event),
   selectField: (() => Event),
   newQuery: (() => Event),
   setValue: (() => Event),
-  switchMode: (() => Event)
+  switchMode: (() => Event),
+  tableDetail: (() => Event)
 }) => {
   const tableMode = props.mode === 'table';
   return (
@@ -48,7 +50,11 @@ const ControlArea = (props: {
           <div>
             <p>showing {props.count}/{props.totalCount} records</p>
         </div>
-        </div>) : ''}
+        </div>) : (
+          <div>
+          <input name="TableDetail" id="tabledetail" onChange={props.setDetailTable} value={props.detailTable} />
+          <button name="GetDetails" onClick={props.getDetailTable}>Go</button>
+        </div>)}
       <div>
         <button onClick={props.switchMode}>View {tableMode ? 'Chart' : 'Table'}</button>
       </div>

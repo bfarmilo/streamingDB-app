@@ -1,3 +1,5 @@
+const { deDuplicate } = require('./QRYsurvival.js')
+
 let client;
 let nextCursor = 0;
 const MAXRESULTS = 100;
@@ -88,7 +90,11 @@ const matchField = (accum, cursor, field, pattern, target) => {
 
 const lookUp = (field, value, cursor, target = 'all') => {
   let totalCount = 0;
-  // console.log(target);
+  // field -> the field to search
+  // value -> the value to match
+  // cursor -> the last cursor for the scan
+  // target -> the name of the table to search or 'all'
+  // returns {cursor: the next cursor, count: num records returned, totalCount: total num of matching records, data:the table data}
   // quickly count the matches
   return getCount([], 0, field, value, target)
     .then(total => totalCount = total)
@@ -100,53 +106,46 @@ const lookUp = (field, value, cursor, target = 'all') => {
     .catch(err => Promise.reject(err));
 }
 
-const survivalAnalysis = () => {
-  return client.smembers('binValues')
-    .then(bins => {
-      return client.multi()
-        .zcard(`survival:${bins[0]}`)
-        .zcard(`survival:${bins[1]}`)
-        .zcard(`survival:${bins[2]}`)
-        .zcard(`survival:${bins[3]}`)
-        .zcard(`survival:${bins[4]}`)
-        .zcard('uniqueClaims')
-        .llen('allClaims')
-        .exec()
-        .then(results => {
-          const totalClaims = results.pop();
-          const uniqueClaims = results.pop();
-          const survival = [];
-          for (let i = 0; i < results.length; i += 1) {
-            survival.push({ type: bins[i], count: results[i] })
-          }
-          survival.sort((a, b) => a.type < b.type);
-          /*           // Total Claims
-                    console.log('Total claims: %s', totalClaims);
-                    // Total Instituted
-                    // Unique Claims
-                    console.log('Unique claims: %d', uniqueClaims);
-                    // Unique Claims by disposition
-                    console.log('Claim Survival Count\n%j', survival.map(item => `${item.type}: ${item.count}`));
-                    console.log('%j', survival.map(item => `${item.type}: ${Math.round(1000 * (item.count / uniqueClaims)) / 10}%`));
-                    console.log('sending result %j', { totalClaims, uniqueClaims, survival }); */
-          return Promise.resolve({ totalClaims, uniqueClaims, survival });
-        })
-    })
-    .catch(err => Promise.reject(err))
-}
+
 
 const replaceData = (recordSet, field, newValue) => {
   // applies a global change to all matching records in a recordSet
   // sets field to newValue
   return client.multi(recordSet.map(record => ['hset', `ClaimID:${item.ID}`, field, newValue]))
-  .exec()
-  .then(result => Promise.resolve(result.count))
-  .catch(err => Promise.reject(err))
+    .exec()
+    .then(result => Promise.resolve(result.count))
+    .catch(err => Promise.reject(err))
+}
+
+
+const lookupByScore = (inputTable, outputTable) => {
+  // takes an inputTable Zset of the form [val, score]
+  // to a new table {outputTable} containing only scores
+  // useful for converting {Patent:Claim ID} tables into ID-only lookups
+  console.log(inputTable);
+  return client.zrange(inputTable, 0, -1, 'WITHSCORES')
+    .then(result => {
+      let index = true;
+      console.log('creating new table %s', outputTable);
+      return keyList = result.reduce((accum, item) => {
+        if (index) {
+
+        } else {
+          accum.push(['sadd', outputTable, `claimID:${item}`])
+        }
+        index = !index;
+        return accum
+      }, []);
+    })
+    .then(cmdList => client.multi(cmdList).exec())
+    .then(() => client.smembers(outputTable))
+    .then(result => Promise.resolve(result))
+    .catch(err => Promise.reject(err))
 }
 
 module.exports = {
   setClient: (inClient) => { client = inClient },
   lookUp,
-  survivalAnalysis,
-  replaceData
+  replaceData,
+  lookupByScore
 }

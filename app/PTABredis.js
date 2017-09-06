@@ -36,12 +36,9 @@ const initDB = (callback) => {
   //push list of searchable tables
   client.sadd(['searchable', 'all', 'killed:300', 'killed:700', 'killed:electronics', 'temp:killed', 'temp:unpat', 'temp:unpat_claim']);
 
-  // hash of JSON data
-  let index = 0;
-
   // TODO: change to a multi
 
-  const output = dataSet.map(item => {
+  const output = dataSet.map((item, index) => {
     // make a table of records
     client.hmset(`claimID:${index}`,
       'ID', index,
@@ -110,31 +107,33 @@ const initDB = (callback) => {
     let mainClass = item.MainUSPC.split('/')[0]
     mainClass = mainClass.length > 2 ? mainClass.match(/(\d)\d{2}/) : [0, 0];
     if (mainClass !== null) client.sadd(`class:${mainClass[1]}00`, `claimID:${index}`);
+    
     // creates a set of patent-claim, useful for unique claims
     client.zadd('uniqueClaims', index, `${item.Patent}:${item.Claim}`);
     client.lpush('allClaims', `${item.Patent}:${item.Claim}`);
+    
     // create a claim survival analysis
+    let survivalStatus = '6_unbinned';
     if (item.Status === 'Terminated-Adverse Judgment' || (item.Status === 'FWD Entered' && item.Invalid) || item.Status === 'Waiver Filed' || item.FWDStatus.toLowerCase() === 'unpatentable') {
       // Terminated with Adverse Judgment (patent owner gives up)
       // Decided and deemed invalid
       // PO Waives the claims
-      client.zadd('survival:5_killed', index, `${item.Patent}:${item.Claim}`);
+      survivalStatus = '5_killed'
     } else if (item.Status === 'Terminated-Settled' && item.Instituted) {
       // Settled after Institution
       // Instituted
-      client.zadd('survival:4_impaired', index, `${item.Patent}:${item.Claim}`);
+      survivalStatus = '4_impaired'
     } else if ((item.Status === 'FWD Entered' && !item.Invalid) || (item.Status === 'Terminated-Settled' && !item.Instituted) || (item.Status === 'Terminated-Denied')) {
       // Decision - not invalid
       // Settled but not Instituted
       // IPR Denied
-      client.zadd('survival:2_unaffected', index, `${item.Patent}:${item.Claim}`);
+      survivalStatus = '2_unaffected';
     } else if ((item.Status === 'Instituted')) {
       // Instituted - no decision yet
-      client.zadd('survival:3_weakened', index, `${item.Patent}:${item.Claim}`)
-    } else {
-      client.zadd('survival:6_unbinned', index, `${item.Patent}:${item.Claim}`);
+      survivalStatus = '3_weakened';
     }
-    index += 1;
+    client.zadd(`survival:${survivalStatus}`, index, `${item.Patent}:${item.Claim}`);
+    client.lpush(`survivalList:${survivalStatus}`, `claimID:${index}`)
     return true;
   });
   if (output.length === dataSet.length) {
