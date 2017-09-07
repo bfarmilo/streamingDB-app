@@ -39,6 +39,7 @@ const deDuplicate = (client) => {
 }
 
 const survivalAnalysis = (client) => {
+  let returnData = {};
   return deDuplicate(client)
     .then(() => client.smembers('binValues'))
     .then(bins => {
@@ -52,12 +53,20 @@ const survivalAnalysis = (client) => {
         .llen('allClaims')
         .exec()
         .then(results => {
-          const totalClaims = results.pop();
-          const uniqueClaims = results.pop();
-          const survival = bins.map((bin, index) => {
+          returnData.totalClaims = results.pop();
+          returnData.uniqueClaims = results.pop();
+          returnData.survival = bins.map((bin, index) => {
             return { type: bin, count: results[index] }
           }).sort((a, b) => a.type < b.type);
-          return Promise.resolve({ totalClaims, uniqueClaims, survival });
+          return bins;
+        })
+        .then(bins => client.multi(bins.map(bin => ['llen', `survivalList:${bin}`])).exec())
+        .then(survivalDup => {
+          returnData.survivalDup = bins.map((bin, index) => {
+            return { type: bin, count: survivalDup[index] };
+          }).sort((a,b) => a.type < b.type);
+          //console.log(returnData);
+          return Promise.resolve(returnData);
         })
     })
     .catch(err => Promise.reject(err))

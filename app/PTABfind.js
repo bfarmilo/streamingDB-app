@@ -8,17 +8,28 @@ const oneLoop = (cursor, field, matchPat, target) => {
   let returnCursor = cursor;
   let scanTarget = [['scan', cursor, 'MATCH', 'claim*']]
   if (target !== 'all') {
-    scanTarget = [['sscan', target, cursor]];
-    // console.log('adding command to multi queue, %j',scanTarget);
+    if (target.includes('survivalList')) {
+      scanTarget = [['lrange', target, cursor, cursor + 100]]
+    } else {
+      scanTarget = [['sscan', target, cursor]];
+    }
+    //console.log('adding command to multi queue, %j',scanTarget);
   }
   return client.multi(scanTarget).exec()
     .then(claimList => {
       // console.log('claimList %j', claimList);
-      // take the listing (element 1) and map it into a ['hmget', 'ID', field]
-      const query = claimList[0][1].map(item => ['hmget', item, 'ID', field]);
-      // take the cursor(element 0) and store it
-      returnCursor = claimList[0][0];
-      // client.multi to generate a result set of arrays [id, field]
+      let query = [];
+      if (target.includes('survivalList')) {
+        returnCursor = claimList[0].length === 0 ? "0" : cursor + 100;
+        query = claimList[0].map(item => ['hmget', item, 'ID', field]);
+      } else {
+        // take the listing (element 1) and map it into a ['hmget', 'ID', field]
+        query = claimList[0][1].map(item => ['hmget', item, 'ID', field]);
+        // take the cursor(element 0) and store it
+        returnCursor = claimList[0][0];
+      }
+      // console.log('returnCursor: %d\nQuery set: %j',returnCursor, query);
+      // client.multi to generate a result set of arrays [id, field]}
       return client.multi(query).exec()
     })
     .then(results => {
@@ -29,7 +40,7 @@ const oneLoop = (cursor, field, matchPat, target) => {
     .then(matches => {
       //console.log('matches: %j, %d', matches, matches.length);
       const result = matches.length > 0 ? { returnCursor, matches: matches.map(item => item[0]) } : { returnCursor }
-      //console.log('resulting matches %j', result);
+      // if (matches.length > 0) console.log('resulting matches %j', result);
       return Promise.resolve(result);
     })
     // resolve with an array [cursor, [matches]]

@@ -13,6 +13,13 @@ const client = redis.createClient({
 
 find.setClient(client);
 
+const searchableSet = [
+  'class',
+  'FWDStatus',
+  'status',
+  'survivalList'
+];
+
 /* GET list of records by query */
 router.get('/run', function (req, res, next) {
   console.log(req.query);
@@ -35,9 +42,9 @@ router.get('/fields', function (req, res, next) {
 
 // gets a list of tables for querying
 router.get('/tables', function (req, res, next) {
-  client.smembers('searchable')
-    .then((result) => {
-      res.json(result)
+  client.multi(searchableSet.map(item => ['keys', `${item}:*`])).exec()
+    .then(result => {
+      res.json(['all'].concat(...result))
     })
     .catch(err => console.error(err));
 });
@@ -59,6 +66,7 @@ router.get('/multiedit', (req, res, next) => {
   // new value
   console.log(req.body);
   req.json()
+  console.log(req);
   // pass the json request body as the first argument,
   // the field as second argument
   // the newValue as third argument

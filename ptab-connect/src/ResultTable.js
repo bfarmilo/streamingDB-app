@@ -35,8 +35,8 @@ const ResultTable = (props: {
               <td>{record.PatentOwner}</td>
               <td>{record.Patent} Clm {record.Claim}</td>
               <td>{record.MainUSPC}</td>
-              <td>{record.Instituted ? 'x' : ''}</td>
-              <td>{record.Invalid ? 'x' : ''}</td>
+              <td>{record.Instituted === '1' ? 'x' : ''}</td>
+              <td>{record.Invalid === '1' ? 'x' : ''}</td>
             </tr>
           )}
         </tbody>

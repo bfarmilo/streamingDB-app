@@ -130,4 +130,4 @@ deDuplicate((err2, data) => {
     return client.multi(query).exec()
       .then(output => output.concat(recordList[0]))
   }
-
+}

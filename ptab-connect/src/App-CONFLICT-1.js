@@ -12,7 +12,7 @@ class App extends Component {
     records: [],
     field: "PatentOwner",
     value: "Personalized",
-    table: "FWDStatus:unpatentable",
+    table: "survivalList:5_killed",
     fields: [],
     tables: [],
     count: 0,
@@ -20,7 +20,6 @@ class App extends Component {
     totalClaims: 0,
     uniqueClaims: 0,
     survival: [],
-    survivalDup: [],
     mode: 'chart',
     goButton: true,
     cursor: 0,
@@ -45,8 +44,7 @@ class App extends Component {
         this.setState({
           totalClaims: results.totalClaims,
           uniqueClaims: results.uniqueClaims,
-          survival: results.survival,
-          survivalDup: results.survivalDup
+          survival: results.survival
         })
       })
   }
@@ -110,12 +108,7 @@ class App extends Component {
   render() {
     const viewArea = this.state.mode === 'table'
       ? (<ResultTable records={this.state.records} />)
-      : (<Charts
-        totalClaims={this.state.totalClaims}
-        uniqueClaims={this.state.uniqueClaims}
-        survival={this.state.survival}
-        survivalDup={this.state.survivalDup}
-      />)
+      : (<Charts totalClaims={this.state.totalClaims} uniqueClaims={this.state.uniqueClaims} survival={this.state.survival} />)
     return (
       <div className="App">
         <ControlArea
@@ -138,7 +131,7 @@ class App extends Component {
           getDetailTable={this.getDetailTable}
         />
         <MultiEdit
-
+          multiEdit={this.multiEdit}
         />
         {viewArea}
       </div>

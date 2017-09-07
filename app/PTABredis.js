@@ -61,10 +61,10 @@ const initDB = (callback) => {
     client.sadd('FWDStatusTypes', item.FWDStatus.toLowerCase());
 
     // bin by FWDStatus to check
-    client.sadd(`FWDStatus:${item.FWDStatus.toLowerCase()}`, index);
+    client.sadd(`FWDStatus:${item.FWDStatus.toLowerCase()}`, `claimID:${index}`);
 
     // patent.claim by index
-    client.sadd(`patent:${item.Patent}-${item.Claim}`, index);
+    client.sadd(`patent:${item.Patent}-${item.Claim}`, `claimID:${index}`);
 
     // a set of killed claims
     if (item.FWDStatus.toLowerCase() === 'unpatentable') {
@@ -75,31 +75,31 @@ const initDB = (callback) => {
     // create sets for all status except FWD entered
     switch (item.Status) {
       case 'Instituted':
-        client.sadd('status:instituted', index);
+        client.sadd('status:instituted', `claimID:${index}`);
         break;
       case 'Notice OF Filing Date Accorded': case 'Filing Date Accorded':
-        client.sadd('status:filed', index);
+        client.sadd('status:filed', `claimID:${index}`);
         break;
       case 'Terminated-Dismissed':
-        client.sadd('status:dismissed', index);
+        client.sadd('status:dismissed', `claimID:${index}`);
         break;
       case 'Terminated-Denied':
-        client.sadd('status:denied', index);
+        client.sadd('status:denied', `claimID:${index}`);
         break;
       case 'Terminated-Other':
-        client.sadd('status:other', index);
+        client.sadd('status:other', `claimID:${index}`);
         break;
       case 'Waiver Filed':
-        client.sadd('status:waived', index);
+        client.sadd('status:waived', `claimID:${index}`);
         break;
       case 'Terminated-Settled':
-        client.sadd('status:settled', index);
+        client.sadd('status:settled', `claimID:${index}`);
         break;
       case 'Terminated-Adverse Judgment':
-        client.sadd('status:lostCase', index)
+        client.sadd('status:lostCase', `claimID:${index}`)
         break;
       case 'FWD Entered':
-        client.sadd('status:decided', index);
+        client.sadd('status:decided', `claimID:${index}`);
         break;
       default:
     }
@@ -144,5 +144,3 @@ const initDB = (callback) => {
 module.exports = {
   initDB
 }
-
-
