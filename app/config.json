@@ -1,5 +1,12 @@
 {
   "database": {
     "server": "127.0.0.1"
-  }
+  },
+  "survivalStatus": [
+    "6_unbinned",
+    "2_unaffected",
+    "3_weakened",
+    "4_impaired",
+    "5_killed"
+  ]
 }

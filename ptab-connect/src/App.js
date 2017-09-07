@@ -24,7 +24,12 @@ class App extends Component {
     mode: 'chart',
     goButton: true,
     cursor: 0,
-    detailTable: 'out:i_w'
+    detailTable: 'out:i_w',
+    details: [],
+    detailCursor: 0,
+    detailCount: 0,
+    detailTotalCount: 0,
+    detailGoButton: true
   }
 
   componentDidMount() {
@@ -53,7 +58,7 @@ class App extends Component {
 
   setDetailTable = (event) => {
     console.log('new detail table selected %s', event.target.value);
-    this.setState({ detailTable: event.target.value });
+    this.setState({ detailTable: event.target.value, detailGoButton: true });
   }
 
   selectTable = (event) => {
@@ -72,14 +77,33 @@ class App extends Component {
   }
 
   getDetailTable = () => {
-    fetch(`/users/survivaldetail?table=${encodeURIComponent(this.state.detailTable)}`)
-      .then(result => console.log(result))
+    const cursor = this.state.detailGoButton ? 0 : this.state.detailCursor;
+    fetch(`/users/survivaldetail2?table=${encodeURIComponent(this.state.detailTable)}&cursor=${cursor}`)
+      .then(res => res.json())
+      .then(result => {
+        console.log(result);
+        this.setState(oldState => {
+          return {
+            detailCount: oldState.detailGoButton ? result.count : oldState.detailCount + result.count,
+            details: oldState.detailGoButton ? result.data : oldState.details.concat(result.data),
+            detailTotalCount: result.totalCount,
+            cursor: result.cursor,
+            detailGoButton: result.cursor === 0
+          }
+        });
+      })
   }
 
-  multiEdit = (rows, field, newValue) => {
+  multiEdit = () => {
     fetch('/users/multiedit', {
-      payload: JSON.stringify({ rows, field, newValue })
-    });
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ rows: ['66804'], field: 'PatentOwner', newValue: 'Personalized Media Communications (npe)' })
+    })
+      .then(res => res.json())
+      .then(result => console.log(result));
   }
 
   newQuery = () => {
@@ -115,6 +139,7 @@ class App extends Component {
         uniqueClaims={this.state.uniqueClaims}
         survival={this.state.survival}
         survivalDup={this.state.survivalDup}
+        details={this.state.details}
       />)
     return (
       <div className="App">
@@ -133,12 +158,15 @@ class App extends Component {
           setValue={this.setValue}
           switchMode={this.switchMode}
           goButton={this.state.goButton}
+          detailGoButton={this.state.detailGoButton}
           detailTable={this.state.detailTable}
           setDetailTable={this.setDetailTable}
           getDetailTable={this.getDetailTable}
+          detailCount={this.state.detailCount}
+          detailTotalCount={this.state.detailTotalCount}
         />
         <MultiEdit
-
+          testMultiEdit={this.multiEdit}
         />
         {viewArea}
       </div>

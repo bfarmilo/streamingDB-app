@@ -18,7 +18,10 @@ const ControlArea = (props: {
   newQuery: (() => Event),
   setValue: (() => Event),
   switchMode: (() => Event),
-  tableDetail: (() => Event)
+  tableDetail: (() => Event),
+  detailGoButton: boolean,
+  detailCount: number,
+  detailTotalCount: number
 }) => {
   const tableMode = props.mode === 'table';
   return (
@@ -26,37 +29,47 @@ const ControlArea = (props: {
       <h3>PTAB Data Extraction</h3>
       {tableMode ? (
         <div className="TableControls">
-          <h4>Current Search Set:
-          <select name="ChooseField" id="fieldselect" onChange={props.selectField} value={props.field}>
-              {props.fields.map(val => (
-                <option key={`ID_${val}`} value={val}>
-                  {val}
-                </option>
-              ))
-              }
-            </select> =
-            <input name="ChooseValue" id="valueselect" onChange={props.setValue} value={props.value} />
-            in
-          <select name="ChooseTable" id="tableselect" onChange={props.selectTable} value={props.table}>
-              {props.tables.map(val => (
-                <option key={`ID_${val}`} value={val}>
-                  {val}
-                </option>
-              ))
-              }
-            </select>
-            <button onClick={props.newQuery}>{props.goButton ? 'Go' : 'More'}</button>
-          </h4>
           <div>
+            <span className="customdropdown">
+              <select name="ChooseField" id="fieldselect" onChange={props.selectField} value={props.field}>
+                {props.fields.map(val => (
+                  <option key={`ID_${val}`} value={val}>
+                    {val}
+                  </option>
+                ))
+                }
+              </select>
+            </span> =
+            <input className="custominput" name="ChooseValue" id="valueselect" onChange={props.setValue} value={props.value} />
+            in
+            <span className="customdropdown">
+              <select name="ChooseTable" id="tableselect" onChange={props.selectTable} value={props.table}>
+                {props.tables.map(val => (
+                  <option key={`ID_${val}`} value={val}>
+                    {val}
+                  </option>
+                ))
+                }
+              </select>
+            </span>
+            <button onClick={props.newQuery}>{props.goButton ? 'Go' : 'More'}</button>
+            <div>
+            </div>
             <p>showing {props.count}/{props.totalCount} records</p>
-        </div>
+          </div>
         </div>) : (
           <div>
-          <input name="TableDetail" id="tabledetail" onChange={props.setDetailTable} value={props.detailTable} />
-          <button name="GetDetails" onClick={props.getDetailTable}>Go</button>
-        </div>)}
-      <div>
-        <button onClick={props.switchMode}>View {tableMode ? 'Chart' : 'Table'}</button>
+            <div>
+              <input className="custominput" name="TableDetail" id="tabledetail" onChange={props.setDetailTable} value={props.detailTable} />
+              <button name="GetDetails" onClick={props.getDetailTable}>{props.detailGoButton ? 'Go' : 'More'}</button>
+            </div>
+            <div>
+            </div>
+            <p>showing {props.detailCount}/{props.detailTotalCount} records</p>
+          </div>
+        )}
+      <div className="SwitchView">
+        <button onClick={props.switchMode}>Switch to {tableMode ? 'Chart' : 'Table'} View</button>
       </div>
     </div>
   );

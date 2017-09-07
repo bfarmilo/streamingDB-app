@@ -57,20 +57,18 @@ router.get('/survival', function (req, res, next) {
       res.json(result)
     })
     .catch(err => console.error(err))
-})
+});
 
-router.get('/multiedit', (req, res, next) => {
+router.post('/multiedit', function (req, res, next) {
   // applies a change to the existing recordset
   // request should contain a list of ID's
   // field to change
   // new value
   console.log(req.body);
-  req.json()
-  console.log(req);
   // pass the json request body as the first argument,
   // the field as second argument
   // the newValue as third argument
-})
+});
 
 router.get('/survivaldetail', function (req, res, next) {
   find.lookupByScore(decodeURIComponent(req.query.table), 'tempTable')
@@ -81,7 +79,6 @@ router.get('/survivaldetail', function (req, res, next) {
     // map to 'hgetall', item
     .then(result => {
       console.log('%d matching results found', result.length);
-      console.log(result[0], result[1])
       return result.map(item => ['hgetall', item])
     })
     // call client multi exec
@@ -89,9 +86,47 @@ router.get('/survivaldetail', function (req, res, next) {
     // return the result in JSON form
     .then(data => res.json(data))
     // cleanup
-    //.then(() => client.del('tempTable'))
+    .then(() => client.del('tempTable'))
     .catch(err => console.error(err))
-})
+});
+
+router.get('/survivaldetail2', (req, res, next) => {
+  let returnValue = {};
+  find.zrangeScan(decodeURIComponent(req.query.table), req.query.cursor)
+    // now go look up the duplicates for each
+    .then(tempResults => {
+      returnValue.cursor = tempResults.cursor;
+      returnValue.count = tempResults.count;
+      returnValue.totalCount = tempResults.totalCount;
+      return tempResults.data.map(item => ['smembers', `patent:${item}`])
+    })
+    .then(cmdList => {
+      // console.log('command list for getting duplicates %j', cmdList)
+      return client.multi(cmdList).exec()
+    })
+    .then(result => {
+      console.log('%d matching results found', result.length);
+      return [].concat(...result).map(item => ['hgetall', item]);
+    })
+    // call client multi exec
+    .then(cmdList => {
+      //console.log('command list for hget operation %j', cmdList);
+      return client.multi(cmdList).exec();
+    })
+    // return the result in JSON form
+    .then(data => {
+      data.sort((a, b) => a.Patent === b.Patent ?
+        parseInt(a.Claim, 10) - parseInt(b.Claim, 10)
+        : parseInt(a.Patent, 10) - parseInt(b.Patent, 10)
+      );
+      return data;
+    })
+    .then(sortedData => {
+      returnValue.data = sortedData;
+      return res.json(returnValue);
+    })
+    .catch(err => console.error(err))
+});
 
 module.exports = router;
 

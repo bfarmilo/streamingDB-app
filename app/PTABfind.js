@@ -117,7 +117,28 @@ const lookUp = (field, value, cursor, target = 'all') => {
     .catch(err => Promise.reject(err));
 }
 
+const zrangeScan = (table, cursor) => {
+  let totalCount = 0;
+  return client.zcard(table)
+    .then(count => totalCount = count)
+    .then(() => client.zscan(table, cursor, 'COUNT', 100))
+    .then(scanResult => {
+      return Promise.resolve({
+        cursor: scanResult[0],
+        count: scanResult[1].length,
+        totalCount,
+        data: scanResult[1].reduce((accum, item, index) => {
+          if (index & 1) {
 
+          } else {
+            accum.push(item)
+          }
+          return accum;
+        }, [])
+      })
+    })
+    .catch(err => Promise.reject(err))
+}
 
 const replaceData = (recordSet, field, newValue) => {
   // applies a global change to all matching records in a recordSet
@@ -136,6 +157,7 @@ const lookupByScore = (inputTable, outputTable) => {
   console.log(inputTable);
   return client.zrange(inputTable, 0, -1, 'WITHSCORES')
     .then(result => {
+      // console.log('zrange result %j', result)
       let index = true;
       console.log('creating new table %s', outputTable);
       return keyList = result.reduce((accum, item) => {
@@ -148,7 +170,10 @@ const lookupByScore = (inputTable, outputTable) => {
         return accum
       }, []);
     })
-    .then(cmdList => client.multi(cmdList).exec())
+    .then(cmdList => {
+      // console.log('list of commands for acquisition %j', cmdList);
+      return client.multi(cmdList).exec()
+    })
     .then(() => client.smembers(outputTable))
     .then(result => Promise.resolve(result))
     .catch(err => Promise.reject(err))
@@ -158,5 +183,6 @@ module.exports = {
   setClient: (inClient) => { client = inClient },
   lookUp,
   replaceData,
-  lookupByScore
+  lookupByScore,
+  zrangeScan
 }

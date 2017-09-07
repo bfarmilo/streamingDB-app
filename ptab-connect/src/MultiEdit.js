@@ -1,9 +1,12 @@
 import React from 'react'
 
-const MultiEdit = (props) => {
+const MultiEdit = (props: {
+  testMultiEdit: (() => Event)
+}) => {
+  const button = <button onClick={props.testMultiEdit}>Test MultiEdit</button>;
   return (
     <div>
-      <button>Test MultiEdit</button>
+      
     </div>
   )
 }

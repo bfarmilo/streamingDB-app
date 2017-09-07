@@ -17,3 +17,8 @@ export type survivalStats = {
   type: string,
   count: number
 }
+
+export type details = {
+  PatentClaim: string,
+  ID: string
+}

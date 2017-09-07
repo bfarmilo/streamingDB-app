@@ -28,7 +28,7 @@ client.on('connect', () => {
 
 const initDB = (callback) => {
   // push list of binValues
-  client.sadd(['binValues', '6_unbinned', '2_unaffected', '3_weakened', '4_impaired', '5_killed']);
+  client.sadd(['binValues', ...config.survivalStatus]);
 
   // push list of keys
   client.sadd(['fieldList'].concat(Object.keys(dataSet[0])));
@@ -39,6 +39,29 @@ const initDB = (callback) => {
   // TODO: change to a multi
 
   const output = dataSet.map((item, index) => {
+    // create a claim survival bins
+    let survivalStatus = '6_unbinned';
+    if (item.Status === 'Terminated-Adverse Judgment' || (item.Status === 'FWD Entered' && item.Invalid) || item.Status === 'Waiver Filed' || item.FWDStatus.toLowerCase() === 'unpatentable') {
+      // Terminated with Adverse Judgment (patent owner gives up)
+      // Decided and deemed invalid
+      // PO Waives the claims
+      survivalStatus = '5_killed'
+    } else if (item.Status === 'Terminated-Settled' && item.Instituted) {
+      // Settled after Institution
+      // Instituted
+      survivalStatus = '4_impaired'
+    } else if ((item.Status === 'FWD Entered' && !item.Invalid) || (item.Status === 'Terminated-Settled' && !item.Instituted) || (item.Status === 'Terminated-Denied')) {
+      // Decision - not invalid
+      // Settled but not Instituted
+      // IPR Denied
+      survivalStatus = '2_unaffected';
+    } else if ((item.Status === 'Instituted')) {
+      // Instituted - no decision yet
+      survivalStatus = '3_weakened';
+    }
+    client.zadd(`survival:${survivalStatus}`, index, `${item.Patent}:${item.Claim}`);
+    client.lpush(`survivalList:${survivalStatus}`, `claimID:${index}`)
+
     // make a table of records
     client.hmset(`claimID:${index}`,
       'ID', index,
@@ -52,7 +75,8 @@ const initDB = (callback) => {
       'MainUSPC', item.MainUSPC,
       'Claim', item.Claim,
       'Instituted', (item.Instituted ? 1 : 0),
-      'Invalid', (item.Invalid ? 1 : 0)
+      'Invalid', (item.Invalid ? 1 : 0),
+      'survivalStatus', survivalStatus
     );
     // a set of status Types
     client.sadd('statusTypes', item.Status);
@@ -64,7 +88,7 @@ const initDB = (callback) => {
     client.sadd(`FWDStatus:${item.FWDStatus.toLowerCase()}`, `claimID:${index}`);
 
     // patent.claim by index
-    client.sadd(`patent:${item.Patent}-${item.Claim}`, `claimID:${index}`);
+    client.sadd(`patent:${item.Patent}:${item.Claim}`, `claimID:${index}`);
 
     // a set of killed claims
     if (item.FWDStatus.toLowerCase() === 'unpatentable') {
@@ -107,33 +131,11 @@ const initDB = (callback) => {
     let mainClass = item.MainUSPC.split('/')[0]
     mainClass = mainClass.length > 2 ? mainClass.match(/(\d)\d{2}/) : [0, 0];
     if (mainClass !== null) client.sadd(`class:${mainClass[1]}00`, `claimID:${index}`);
-    
+
     // creates a set of patent-claim, useful for unique claims
     client.zadd('uniqueClaims', index, `${item.Patent}:${item.Claim}`);
     client.lpush('allClaims', `${item.Patent}:${item.Claim}`);
-    
-    // create a claim survival analysis
-    let survivalStatus = '6_unbinned';
-    if (item.Status === 'Terminated-Adverse Judgment' || (item.Status === 'FWD Entered' && item.Invalid) || item.Status === 'Waiver Filed' || item.FWDStatus.toLowerCase() === 'unpatentable') {
-      // Terminated with Adverse Judgment (patent owner gives up)
-      // Decided and deemed invalid
-      // PO Waives the claims
-      survivalStatus = '5_killed'
-    } else if (item.Status === 'Terminated-Settled' && item.Instituted) {
-      // Settled after Institution
-      // Instituted
-      survivalStatus = '4_impaired'
-    } else if ((item.Status === 'FWD Entered' && !item.Invalid) || (item.Status === 'Terminated-Settled' && !item.Instituted) || (item.Status === 'Terminated-Denied')) {
-      // Decision - not invalid
-      // Settled but not Instituted
-      // IPR Denied
-      survivalStatus = '2_unaffected';
-    } else if ((item.Status === 'Instituted')) {
-      // Instituted - no decision yet
-      survivalStatus = '3_weakened';
-    }
-    client.zadd(`survival:${survivalStatus}`, index, `${item.Patent}:${item.Claim}`);
-    client.lpush(`survivalList:${survivalStatus}`, `claimID:${index}`)
+
     return true;
   });
   if (output.length === dataSet.length) {

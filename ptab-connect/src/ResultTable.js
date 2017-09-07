@@ -8,7 +8,7 @@ const ResultTable = (props: {
   records: Array<resultSet>
 }) => {
   return (
-    <div className="ResultTable">
+    <div className="DetailTable">
       <table>
         <thead>
           <tr>
