@@ -5,11 +5,12 @@ const router = express.Router();
 const redis = require('promise-redis')();
 const find = require('../app/PTABfind.js');
 const { survivalAnalysis } = require('../app/QRYsurvival.js');
+const { initDB } = require('../app/PTABredis.js');
 const config = require('../app/config.json');
 
 const client = redis.createClient({
   host: config.database.server
-})
+}).then(() => console.log('database connected'))
 
 find.setClient(client);
 
@@ -19,6 +20,9 @@ const searchableSet = [
   'status',
   'survivalList'
 ];
+
+// initialize redis DB
+client.flushdb().then(()=> initDB(client)).then(ok => console.log(ok));
 
 /* GET list of records by query */
 router.get('/run', function (req, res, next) {
@@ -52,7 +56,7 @@ router.get('/tables', function (req, res, next) {
 // survival data
 router.get('/survival', function (req, res, next) {
   // pulls the count of claim survival statistics
-  survivalAnalysis(client)
+  survivalAnalysis(client, decodeURIComponent(req.query.table))
     .then(result => {
       res.json(result)
     })
