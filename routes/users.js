@@ -6,11 +6,12 @@ const redis = require('promise-redis')();
 const find = require('../app/PTABfind.js');
 const { survivalAnalysis } = require('../app/QRYsurvival.js');
 const { initDB } = require('../app/PTABredis.js');
+const { getEntityData } = require('../app/QRYtypes.js');
 const config = require('../app/config.json');
 
 const client = redis.createClient({
   host: config.database.server
-}).then(() => console.log('database connected'))
+});
 
 find.setClient(client);
 
@@ -22,7 +23,10 @@ const searchableSet = [
 ];
 
 // initialize redis DB
-client.flushdb().then(()=> initDB(client)).then(ok => console.log(ok));
+client.flushdb()
+.then(()=> initDB(client))
+.then(() => getEntityData(client))
+.then(ok => console.log(ok));
 
 /* GET list of records by query */
 router.get('/run', function (req, res, next) {
@@ -56,7 +60,8 @@ router.get('/tables', function (req, res, next) {
 // survival data
 router.get('/survival', function (req, res, next) {
   // pulls the count of claim survival statistics
-  survivalAnalysis(client, decodeURIComponent(req.query.table))
+  console.log('received request to update chart %d - %s', req.query.chart, req.query.table);
+  survivalAnalysis(client, decodeURIComponent(req.query.table), req.query.chart)
     .then(result => {
       res.json(result)
     })
@@ -72,26 +77,6 @@ router.post('/multiedit', function (req, res, next) {
   // pass the json request body as the first argument,
   // the field as second argument
   // the newValue as third argument
-});
-
-router.get('/survivaldetail', function (req, res, next) {
-  find.lookupByScore(decodeURIComponent(req.query.table), 'tempTable')
-    // the json request should include a table
-    // so call lookupByScore with the table, this generates a set
-    // get smembers
-    .then(() => client.smembers('tempTable'))
-    // map to 'hgetall', item
-    .then(result => {
-      console.log('%d matching results found', result.length);
-      return result.map(item => ['hgetall', item])
-    })
-    // call client multi exec
-    .then(cmdList => client.multi(cmdList).exec())
-    // return the result in JSON form
-    .then(data => res.json(data))
-    // cleanup
-    .then(() => client.del('tempTable'))
-    .catch(err => console.error(err))
 });
 
 router.get('/survivaldetail2', (req, res, next) => {

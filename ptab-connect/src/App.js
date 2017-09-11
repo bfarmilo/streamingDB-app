@@ -17,10 +17,10 @@ class App extends Component {
     tables: [],
     count: 0,
     totalCount: 0,
-    totalClaims: 0,
-    uniqueClaims: 0,
-    survival: [],
-    survivalDup: [],
+    totalClaims: [],
+    uniqueClaims: [],
+    chartData: [],
+    chartTitle: ['all', 'patentownertype:lawfirm'],
     mode: 'chart',
     goButton: true,
     cursor: 0,
@@ -45,16 +45,17 @@ class App extends Component {
       .then(records => {
         this.setState({ cursor: records.cursor, count: records.count, records: records.data, totalCount: records.totalCount })
       })
-    fetch('/users/survival?table=all')
-      .then(res => res.json())
+    return Promise.all(this.state.chartTitle.map((table, index) => {
+      return fetch(`/users/survival?table=${encodeURIComponent(table)}&chart=${index}`)
+        .then(res => res.json())
+    }))
       .then(results => {
-        this.setState({
-          totalClaims: results.totalClaims,
-          uniqueClaims: results.uniqueClaims,
-          survival: results.survival,
-          survivalDup: results.survivalDup,
-          spinner: false
-        })
+        const chartData = [].concat(...results.map((item, idx) => {
+          return [{ title: `${item.title} - with Duplicates`, index: (idx + 1) * 2 - 1, count: item.countTotal, data: item.survivalTotal }]
+            .concat([{ title: `${item.title} - unique only`, index: (idx + 1) * 2, count: item.countUnique, data: item.survivalUnique }])
+        }))
+        console.log(chartData);
+        this.setState({ chartData, spinner:false })
       })
   }
 
@@ -143,8 +144,7 @@ class App extends Component {
       : (<Charts
         totalClaims={this.state.totalClaims}
         uniqueClaims={this.state.uniqueClaims}
-        survival={this.state.survival}
-        survivalDup={this.state.survivalDup}
+        chartData={this.state.chartData}
         details={this.state.details}
       />)
     const logo = this.state.spinner ? (

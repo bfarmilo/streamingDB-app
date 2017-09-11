@@ -32,12 +32,10 @@ find.lookUp('Instituted', '1', 'all')
 // Test generating a custom ZLIST for survival analysis
 client.keys('patentowner*').then(result => result.length).then(length => {
   console.log('%d patentowner keys found', length)
-  // if no keys found, create an index first
   if (length === 0) {
     return getEntityData(client)
   }
-  // otherwise we already have this data available
-  return Promise.resolve(length);
+  return Promise.resolve('done');
 })
   .then(() => binClaims(client, 'patentownertype:person', "99"))
   .then(result => console.log(result.length))
