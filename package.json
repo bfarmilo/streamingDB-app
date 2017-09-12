@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "start": "set PORT=3001 && node ./bin/www",
-    "resetDB": "node ./app/PTABredis.js"
+    "resetDB": "node ./app/PTABredis.js",
+    "c9start": "sudo service redis-server start && set PORT:8081 && node ./bin/www"
   },
   "dependencies": {
     "body-parser": "~1.17.1",

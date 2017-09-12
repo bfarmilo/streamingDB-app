@@ -1,3 +1,5 @@
+//@flow
+
 import React from 'react'
 import PieChart from './PieChart';
 import type survivalStats from './typedefs';
@@ -5,21 +7,33 @@ import type survivalStats from './typedefs';
 const Charts = (props: {
   chartData: Array<{ index: number, count: number, data: Array<survivalStats> }>,
   details: Array<resultSet>,
-  handleChartClick: (() => Event)
+  handleChartClick: (() => Event),
+  availableTables: Array<string>,
+  currentSelection: Array<string>,
+  selectChart: (() => Event)
 }) => {
   const viewSize = 300;
-  // TODO: convert PieCharts to an array.map. This means survival, count are elements of the array
   return (
     <div className="ChartArea">
       <div className="SurvivalCharts">
-        {props.chartData.map(item => (
-          <div>
+        {props.chartData.map((item, idx) => (
+          <div key={`chart${item.index}`}>
             <h3>{item.title}</h3>
-          <PieChart key={item.index}
-            data={item.data}
-            total={item.count}
-            viewSize={viewSize}
-          />
+            <span className="customdropdown">
+              <select name={`chart${item.index}`} id={item.index} onChange={props.selectChart} value={props.currentSelection[idx]}>
+                {props.availableTables.map(val => (
+                  <option key={`ID_${val}`} value={val}>
+                    {val}
+                  </option>
+                ))
+                }
+              </select>
+            </span>
+            <PieChart
+              data={item.data}
+              total={item.count}
+              viewSize={viewSize}
+            />
           </div>))}
       </div>
       <div className="DetailTable">

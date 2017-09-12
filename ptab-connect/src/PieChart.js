@@ -4,8 +4,15 @@ import { VictoryPie, VictoryTheme, VictoryContainer, VictoryLabel } from 'victor
 const PieChart = (props:{
   total:number,
   data:Array<{type: string, count:number}>,
-  viewSize: number
+  viewSize: number,
+  availableTables:Array<string>,
+  handleNewSelection: (() => Event),
+  currentSelection: (() => Event)
 }) => {
+  //TODO: Add select boxes to allow picking new charts
+  // Populate using props.availableTables
+  // current selection with props.currentSelection
+  // onChange with props.handleNewSelection
   return (
       <div className="Chart">
           <svg viewBox={`0 0 ${props.viewSize} ${props.viewSize}`}>

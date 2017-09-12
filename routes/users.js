@@ -15,11 +15,13 @@ const client = redis.createClient({
 
 find.setClient(client);
 
+// these are namespaces that you can use to select a graph to view
 const searchableSet = [
   'class',
   'FWDStatus',
   'status',
-  'survivalList'
+  'patentownertype',
+  'petitionertype'
 ];
 
 // initialize redis DB

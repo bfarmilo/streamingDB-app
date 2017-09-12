@@ -6,7 +6,8 @@ const binClaims = (client, collection, chartID) => {
   // 1. intersect collection with each of the survivalList entries
   // 2. create ID patent:claim ZLISTS for each intersection
   // 2.1 for each bin, get the list and map it to hmget Patent Claim
-  // return the namespace of the ZLISTS for use in deDuplicate
+  // returns a multi-line string indicating the number of items in each bin 
+  // of the newly-created ZLISTS
 
   return client.keys(`chart${chartID}:index`)
     .then(result => {

@@ -54,8 +54,8 @@ class App extends Component {
           return [{ title: `${item.title} - with Duplicates`, index: (idx + 1) * 2 - 1, count: item.countTotal, data: item.survivalTotal }]
             .concat([{ title: `${item.title} - unique only`, index: (idx + 1) * 2, count: item.countUnique, data: item.survivalUnique }])
         }))
-        console.log(chartData);
-        this.setState({ chartData, spinner:false })
+        console.log('got initial chart Data\n%j', chartData);
+        this.setState({ chartData, spinner: false })
       })
   }
 
@@ -63,6 +63,33 @@ class App extends Component {
     console.log('new detail table selected %s', event.target.value);
     this.setState({ detailTable: event.target.value, detailGoButton: true });
   }
+
+  selectChart = (event) => {
+    console.log('changing %s to %s, chart %d', event.target.name, event.target.value, parseInt(event.target.id, 10) - 1);
+    // set chartTitle to update the screen and the spinner
+    const newTitle = this.state.chartTitle.map((item, index) => {
+      let changeIdx = parseInt(event.target.id, 10) <= 2 ? 0 : 1;
+      if (changeIdx === index) return event.target.value;
+      return item;
+    });
+    this.setState({ spinner: true, chartTitle: newTitle });
+    // fetch the new chart data
+    Promise.all(newTitle.map((table, index) => {
+      return fetch(`/users/survival?table=${encodeURIComponent(table)}&chart=${index}`)
+        .then(res => res.json())
+    }))
+      .then(results => {
+        const chartData = [].concat(...results.map((item, idx) => {
+          return [{ title: `${item.title} - with Duplicates`, index: (idx + 1) * 2 - 1, count: item.countTotal, data: item.survivalTotal }]
+            .concat([{ title: `${item.title} - unique only`, index: (idx + 1) * 2, count: item.countUnique, data: item.survivalUnique }])
+        }))
+        console.log('got new chart Data\n%j', chartData);
+        // set chartData and spinner:false
+        this.setState({ chartData, spinner: false })
+      })
+    
+  }
+
 
   selectTable = (event) => {
     console.log('new table selected %s', event.target.value);
@@ -146,6 +173,9 @@ class App extends Component {
         uniqueClaims={this.state.uniqueClaims}
         chartData={this.state.chartData}
         details={this.state.details}
+        availableTables={this.state.tables}
+        selectChart={this.selectChart}
+        currentSelection={[].concat(...this.state.chartTitle.map(item => [item, item]))}
       />)
     const logo = this.state.spinner ? (
       <modal className="logo-background">
