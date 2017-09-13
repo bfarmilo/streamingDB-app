@@ -82,9 +82,22 @@ const initDB = (client) => {
         }
         // create a list based on the first number of the USPC
         let mainClass = item.MainUSPC.split('/')[0]
-        mainClass = mainClass.length > 2 ? mainClass.match(/(\d)\d{2}/) : [0, 0];
-        if (mainClass !== null) cmdList.push(['sadd', `class:${mainClass[1]}00`, `claimID:${index}`]);
-
+        hundreds = mainClass.length > 2 ? mainClass.match(/(\d)\d{2}/) : [0, 0];
+        if (hundreds !== null) {
+          cmdList.push(['sadd', `class:${hundreds[1]}00`, `claimID:${index}`]);
+          if (hundreds[1] === '5'
+            || hundreds[1] === '6'
+            || mainClass === '424'
+            || mainClass === '430'
+            || mainClass === '435'
+            || mainClass === '436') cmdList.push(['sadd', `class:Pharma`, `claimID:${index}`]);
+          if (hundreds[1] === '3'
+            || hundreds[1] === '7'
+            || mainClass === '439'
+            || mainClass === '455') cmdList.push(['sadd', `class:Electronics`, `claimID:${index}`]);
+        } else {
+          cmdList.push(['sadd', 'class:unknown', `claimID:${index}`])
+        }
         // creates a set of patent-claim, useful for unique claims
         cmdList.push(['zadd', 'uniqueClaims', index, `${item.Patent}:${item.Claim}`]);
         cmdList.push(['lpush', 'allClaims', `${item.Patent}:${item.Claim}`]);

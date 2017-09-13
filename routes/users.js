@@ -9,11 +9,8 @@ const { initDB } = require('../app/PTABredis.js');
 const { getEntityData } = require('../app/QRYtypes.js');
 const config = require('../app/config.json');
 
-const client = redis.createClient({
-  host: config.database.server
-});
-
-find.setClient(client);
+let client; // need this global for the other functions to re-use
+let clientActive = false;
 
 // these are namespaces that you can use to select a graph to view
 const searchableSet = [
@@ -24,25 +21,67 @@ const searchableSet = [
   'petitionertype'
 ];
 
-// initialize redis DB
-client.flushdb()
-.then(()=> initDB(client))
-.then(() => getEntityData(client))
-.then(ok => console.log(ok));
+const startClient = () => {
+  const client = redis.createClient();
+  setListener(client);
+  return client;
+  /* return redis.createClient(
+    6380,
+    config.database.server,
+    {
+      password: config.database.keyPrime,
+      tls: {
+        servername: config.database.server
+      }
+    }
+  ) */
+};
+
+const setListener = (connection) => {
+  connection.on('end', () => {
+    console.log('connection closed');
+    clientActive = false;
+  });
+  connection.on('connect', () => {
+    console.log('connection opened');
+    clientActive = true;
+  });
+  connection.on('error', (err) => {
+    console.error('connection error !', err)
+  });
+}
+
+// check redis DB, initialize if req'd
+router.get('/reset', (req, res, next) => {
+  if (!clientActive) client = startClient();
+  client.flushdb()
+    .then(() => initDB(client))
+    .then(() => getEntityData(client))
+    .then(ok => {
+      return client.quit()
+      console.log(ok)
+    })
+    .catch(err => console.error(err));
+})
+
 
 /* GET list of records by query */
 router.get('/run', function (req, res, next) {
+  if (!clientActive) client = startClient();
+  find.setClient(client);
   console.log(req.query);
   find.lookUp(req.query.field, req.query.value, req.query.cursor, decodeURIComponent(req.query.table))
     .then(result => {
       console.log('%d results returned', result.count)
       res.json(result);
     })
+    .then(() => client.quit())
     .catch(err => console.error(err));
 });
 
 // gets a list of fields for querying
 router.get('/fields', function (req, res, next) {
+  if (!clientActive) client = startClient();
   client.smembers('fieldList')
     .then((result) => {
       res.json(result)
@@ -52,6 +91,7 @@ router.get('/fields', function (req, res, next) {
 
 // gets a list of tables for querying
 router.get('/tables', function (req, res, next) {
+  if (!clientActive) client = startClient();
   client.multi(searchableSet.map(item => ['keys', `${item}:*`])).exec()
     .then(result => {
       res.json(['all'].concat(...result))
@@ -61,6 +101,7 @@ router.get('/tables', function (req, res, next) {
 
 // survival data
 router.get('/survival', function (req, res, next) {
+  if (!clientActive) client = startClient();
   // pulls the count of claim survival statistics
   console.log('received request to update chart %d - %s', req.query.chart, req.query.table);
   survivalAnalysis(client, decodeURIComponent(req.query.table), req.query.chart)
@@ -82,6 +123,7 @@ router.post('/multiedit', function (req, res, next) {
 });
 
 router.get('/survivaldetail2', (req, res, next) => {
+  if (!clientActive) client = startClient();
   let returnValue = {};
   find.zrangeScan(decodeURIComponent(req.query.table), req.query.cursor)
     // now go look up the duplicates for each
