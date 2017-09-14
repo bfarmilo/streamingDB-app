@@ -1,0 +1,231 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  animation: App-logo-spin infinite 10s linear;
+  height: 100px;
+  margin-top:20%;
+  margin-left:auto;
+  margin-right:auto;
+}
+
+.logo-background {
+  position: absolute;
+  top: 220px;
+  left: 0px;
+  width: 100%;
+  height: 100%;
+  z-index: 9998;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+
+}
+
+.ControlArea {
+  background-color: #222;
+  height: 200px;
+  padding: 20px;
+  color: white;
+}
+
+.App-intro {
+  font-size: large;
+}
+
+.SurvivalCharts {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-flow: row wrap;
+}
+
+.Spacer {
+  min-width: 50px;
+}
+
+@import "https://fonts.googleapis.com/css?family=Montserrat:300,400,700";
+.rwd-table {
+  margin: 1em 0;
+  min-width: 200px;
+  background: #34495E;
+  color: #fff;
+  border-radius: .4em;
+  overflow: hidden;
+}
+
+.rwd-table tr {
+  border-top: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
+  border-color: #46637f;
+}
+
+.rwd-table td:before {
+  display: none;
+}
+
+.rwd-table th, .rwd-table td {
+  display: table-cell;
+  padding: .25em .5em !important;
+}
+
+body {
+  padding: 0 2em;
+  font-family: Montserrat, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  color: #444;
+  background: #eee;
+}
+
+h1 {
+  font-weight: normal;
+  letter-spacing: -1px;
+  color: #34495E;
+}
+
+.rwd-table th {
+  color: #dd5;
+}
+
+.DetailTable td, .DetailTable th {
+  padding: .25em .5em;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.TableControls {
+  display: flex;
+  justify-content: center;
+}
+
+buttonGroup {
+  display: flex;
+  margin: 10px auto;
+}
+
+button {
+  display: inline-block;
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+  padding: .5em;
+  background: #009ED8;
+  border: none;
+  color: white;
+  transition: .2s;
+  border-radius: 3px;
+  font-size: 1em;
+  margin: 1px;
+}
+
+button:hover {
+  background: #0079a5;
+}
+
+button:disabled {
+  background: #002e3f;
+  outline: none;
+}
+
+button {
+  min-width: 4em;
+}
+
+
+/* Custom dropdown */
+
+.customdropdown {
+  position: relative;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.customdropdown select {
+  background-color: #009ED8;
+  color: white;
+  font-size: inherit;
+  padding: .5em;
+  padding-right: 2.5em;
+  border: 0;
+  margin: 1px;
+  border-radius: 3px;
+  text-indent: 0.01px;
+  text-overflow: '';
+  -webkit-appearance: button;
+  /* hide default arrow in chrome OSX */
+}
+
+.customdropdown select>option {
+  background: #002e3f;
+}
+
+.customdropdown::before, .customdropdown::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+}
+
+.customdropdown::after {
+  /*  Custom dropdown arrow */
+  content: "\25BC";
+  height: 1em;
+  font-size: .625em;
+  line-height: 1;
+  right: 1.2em;
+  top: 50%;
+  margin-top: -.5em;
+}
+
+.customdropdown::before {
+  /*  Custom dropdown arrow cover */
+  width: 2em;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  border-radius: 0 3px 3px 0;
+}
+
+.customdropdown select[disabled] {
+  color: rgba(0, 0, 0, .3);
+}
+
+.customdropdown select[disabled]::after {
+  color: rgba(0, 0, 0, .1);
+}
+
+.customdropdown::before {
+  background-color: rgba(0, 0, 0, .15);
+}
+
+.customdropdown::after {
+  color: rgba(0, 0, 0, .4);
+}
+
+.custominput {
+  background-color: #009ED8;
+  color: white;
+  font-size: inherit;
+  padding: .5em;
+  border: 0;
+  margin: 1px;
+  border-radius: 3px;
+  text-indent: 0.01px;
+  text-overflow: '';
+}
+
+.SwitchView {
+  position: absolute;
+  top: 175px;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  width: 200px;
+}

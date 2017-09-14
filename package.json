@@ -1,22 +1,22 @@
 {
-  "name": "ptab-analysis",
-  "version": "0.0.0",
+  "name": "ptab-connect",
+  "version": "0.1.0",
   "private": true,
-  "engines" : {"node": "8.x.x"},
-  "scripts": {
-    "start": "set PORT=3001 && node ./bin/www",
-    "startLocal": "set PORT=3001 && node ./bin/www local",
-    "resetDB": "node ./app/PTABredis.js",
-    "c9start": "sudo service redis-server start && set PORT:8081 && node ./bin/www"
+  "devDependencies": {
+    "react-scripts": "1.0.12"
   },
   "dependencies": {
-    "body-parser": "~1.17.1",
-    "cookie-parser": "~1.4.3",
-    "debug": "~2.6.3",
-    "express": "~4.15.2",
-    "jade": "~1.11.0",
-    "morgan": "~1.8.1",
-    "promise-redis": "^0.0.5",
-    "serve-favicon": "~2.4.2"
-  }
+    "flow-bin": "^0.53.1",
+    "global": "^4.3.2",
+    "react": "^15.6.1",
+    "react-dom": "^15.6.1",
+    "victory": "^0.21.5"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  },
+  "proxy": "https://ptab-server.azurewebsites.net"
 }
