@@ -19,5 +19,5 @@
     "eject": "react-scripts eject"
   },
   "proxy": "https://ptab-server.azurewebsites.net",
-  "homepage": "https://ptab-server.azurewebsites.net"
+  "homepage": "https://ptab-analysis.azurewebsites.net"
 }
