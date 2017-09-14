@@ -42,13 +42,13 @@ class App extends Component {
     fetch(`${baseUrl}/tables`)
       .then(res => res.json())
       .then(tables => this.setState({ tables }))
-    fetch(`${baseUrl}/runfield=${this.state.field}&value=${this.state.value}&cursor=${this.state.cursor}&table=${encodeURIComponent(this.state.table)}`)
+    fetch(`${baseUrl}/run?field=${this.state.field}&value=${this.state.value}&cursor=${this.state.cursor}&table=${encodeURIComponent(this.state.table)}`)
       .then(res => res.json())
       .then(records => {
         this.setState({ cursor: records.cursor, count: records.count, records: records.data, totalCount: records.totalCount })
       })
     return Promise.all(this.state.chartTitle.map((table, index) => {
-      return fetch(`${baseUrl}/survivaltable=${encodeURIComponent(table)}&chart=${index}`)
+      return fetch(`${baseUrl}/survival?table=${encodeURIComponent(table)}&chart=${index}`)
         .then(res => res.json())
     }))
       .then(results => {
@@ -77,7 +77,7 @@ class App extends Component {
     this.setState({ spinner: true, chartTitle: newTitle });
     // fetch the new chart data
     Promise.all(newTitle.map((table, index) => {
-      return fetch(`${baseUrl}/survivaltable=${encodeURIComponent(table)}&chart=${index}`)
+      return fetch(`${baseUrl}/survival?table=${encodeURIComponent(table)}&chart=${index}`)
         .then(res => res.json())
     }))
       .then(results => {
@@ -111,7 +111,7 @@ class App extends Component {
   getDetailTable = () => {
     this.setState({ spinner: true })
     const cursor = this.state.detailGoButton ? 0 : this.state.detailCursor;
-    fetch(`${baseUrl}/survivaldetailtable=${encodeURIComponent(this.state.detailTable)}&cursor=${cursor}`)
+    fetch(`${baseUrl}/survivaldetail?table=${encodeURIComponent(this.state.detailTable)}&cursor=${cursor}`)
       .then(res => res.json())
       .then(result => {
         console.log(result);
@@ -144,7 +144,7 @@ class App extends Component {
     this.setState({ spinner: true });
     const cursor = this.state.goButton ? 0 : this.state.cursor;
     console.log('request for new query of %s where %s=%s', this.state.table, this.state.field, this.state.value)
-    fetch(`${baseUrl}/runfield=${this.state.field}&value=${this.state.value}&cursor=${cursor}&table=${encodeURIComponent(this.state.table)}`)
+    fetch(`${baseUrl}/run?field=${this.state.field}&value=${this.state.value}&cursor=${cursor}&table=${encodeURIComponent(this.state.table)}`)
       .then(res => res.json())
       .then(records => {
         this.setState(oldState => {
