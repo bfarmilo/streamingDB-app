@@ -33,7 +33,8 @@ class App extends Component {
     detailCount: 0,
     detailTotalCount: 0,
     detailGoButton: true,
-    spinner: true
+    spinner: true,
+    disableDetails: true
   }
 
   componentDidMount() {
@@ -172,7 +173,7 @@ class App extends Component {
     const viewArea = this.state.mode === 'table'
       ? (<ResultTable records={this.state.records} />)
       : (<Charts
-        disableDetails={true}
+        disableDetails={this.state.disableDetails}
         totalClaims={this.state.totalClaims}
         uniqueClaims={this.state.uniqueClaims}
         chartData={this.state.chartData}
@@ -217,7 +218,7 @@ class App extends Component {
           getDetailTable={this.getDetailTable}
           detailCount={this.state.detailCount}
           detailTotalCount={this.state.detailTotalCount}
-          disableDetails={true}
+          disableDetails={this.state.disableDetails}
         />
         <MultiEdit
           testMultiEdit={this.multiEdit}
