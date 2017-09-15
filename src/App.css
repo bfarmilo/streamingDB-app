@@ -66,11 +66,11 @@
 
 .rwd-table th, .rwd-table td {
   display: table-cell;
-  padding: .25em .5em !important;
+  padding: .125em .25em !important;
 }
 
 body {
-  padding: 0 2em;
+  padding: 0 1em;
   font-family: Montserrat, sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -89,7 +89,7 @@ h1 {
 }
 
 .DetailTable td, .DetailTable th {
-  padding: .25em .5em;
+  padding: .125em .25em;
 }
 
 @keyframes App-logo-spin {

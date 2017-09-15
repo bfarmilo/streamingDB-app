@@ -13,6 +13,31 @@ const Charts = (props: {
   selectChart: (() => Event)
 }) => {
   const viewSize = 300;
+  const disableDetails = true;
+  const details = !disableDetails ? (<div className="DetailTable">
+  <table>
+    <tbody>
+      <tr>
+        <th>Patent: Claim</th>
+        <th>unaffected</th>
+        <th>weakened</th>
+        <th>impaired</th>
+        <th>killed</th>
+        <th>unbinned</th>
+      </tr>
+      {props.details.map(item => (
+        <tr key={`${item.ID}`}>
+          <td>{item.Patent}:{item.Claim}</td>
+          <td>{item.survivalStatus === '2_unaffected' ? `${item.IPR}` : ''}</td>
+          <td>{item.survivalStatus === '3_weakened' ? `${item.IPR}` : ''}</td>
+          <td>{item.survivalStatus === '4_impaired' ? `${item.IPR}` : ''}</td>
+          <td>{item.survivalStatus === '5_killed' ? `${item.IPR}` : ''}</td>
+          <td>{item.survivalStatus === '6_unbinned' ? `${item.IPR}` : ''}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>) : <div />;
   return (
     <div className="ChartArea">
       <div className="SurvivalCharts">
@@ -36,30 +61,7 @@ const Charts = (props: {
             />
           </div>))}
       </div>
-      <div className="DetailTable">
-        <table>
-          <tbody>
-            <tr>
-              <th>Patent: Claim</th>
-              <th>unaffected</th>
-              <th>weakened</th>
-              <th>impaired</th>
-              <th>killed</th>
-              <th>unbinned</th>
-            </tr>
-            {props.details.map(item => (
-              <tr key={`${item.ID}`}>
-                <td>{item.Patent}:{item.Claim}</td>
-                <td>{item.survivalStatus === '2_unaffected' ? `${item.IPR}` : ''}</td>
-                <td>{item.survivalStatus === '3_weakened' ? `${item.IPR}` : ''}</td>
-                <td>{item.survivalStatus === '4_impaired' ? `${item.IPR}` : ''}</td>
-                <td>{item.survivalStatus === '5_killed' ? `${item.IPR}` : ''}</td>
-                <td>{item.survivalStatus === '6_unbinned' ? `${item.IPR}` : ''}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {details}
     </div>
   )
 }

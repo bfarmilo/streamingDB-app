@@ -24,6 +24,18 @@ const ControlArea = (props: {
   detailTotalCount: number
 }) => {
   const tableMode = props.mode === 'table';
+  const disableDetails = true;
+  const details = !disableDetails ? (
+    <div>
+      <div>
+        <input className="custominput" name="TableDetail" id="tabledetail" onChange={props.setDetailTable} value={props.detailTable} />
+        <button name="GetDetails" onClick={props.getDetailTable}>{props.detailGoButton ? 'Go' : 'More'}</button>
+      </div>
+      <div>
+      </div>
+      <p>showing {props.detailCount}/{props.detailTotalCount} records</p>
+    </div>
+  ) : <div />
   return (
     <div className="ControlArea">
       <h3>PTAB Data Extraction</h3>
@@ -57,17 +69,8 @@ const ControlArea = (props: {
             </div>
             <p>showing {props.count}/{props.totalCount} records</p>
           </div>
-        </div>) : (
-          <div>
-            <div>
-              <input className="custominput" name="TableDetail" id="tabledetail" onChange={props.setDetailTable} value={props.detailTable} />
-              <button name="GetDetails" onClick={props.getDetailTable}>{props.detailGoButton ? 'Go' : 'More'}</button>
-            </div>
-            <div>
-            </div>
-            <p>showing {props.detailCount}/{props.detailTotalCount} records</p>
-          </div>
-        )}
+        </div>) : {details}
+        }
       <div className="SwitchView">
         <button onClick={props.switchMode}>Switch to {tableMode ? 'Chart' : 'Table'} View</button>
       </div>
