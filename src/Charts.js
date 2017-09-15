@@ -10,11 +10,11 @@ const Charts = (props: {
   handleChartClick: (() => Event),
   availableTables: Array<string>,
   currentSelection: Array<string>,
-  selectChart: (() => Event)
+  selectChart: (() => Event),
+  disableDetails: boolean
 }) => {
   const viewSize = 300;
-  const disableDetails = true;
-  const details = !disableDetails ? (<div className="DetailTable">
+  const details = !props.disableDetails ? (<div className="DetailTable">
   <table>
     <tbody>
       <tr>

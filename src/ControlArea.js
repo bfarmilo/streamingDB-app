@@ -21,11 +21,11 @@ const ControlArea = (props: {
   tableDetail: (() => Event),
   detailGoButton: boolean,
   detailCount: number,
-  detailTotalCount: number
+  detailTotalCount: number,
+  disableDetails: boolean
 }) => {
   const tableMode = props.mode === 'table';
-  const disableDetails = true;
-  const details = !disableDetails ? (
+  const details = !props.disableDetails ? (
     <div>
       <div>
         <input className="custominput" name="TableDetail" id="tabledetail" onChange={props.setDetailTable} value={props.detailTable} />

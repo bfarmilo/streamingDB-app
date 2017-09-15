@@ -8,7 +8,7 @@ import MultiEdit from './MultiEdit';
 import './App.css';
 
 const baseUrl = "https://ptab-server.azurewebsites.net";
-const userID = Math.round(Math.random()*1000);
+const userID = Math.round(Math.random() * 1000);
 
 class App extends Component {
   state = {
@@ -90,7 +90,7 @@ class App extends Component {
         // set chartData and spinner:false
         this.setState({ chartData, spinner: false })
       })
-    
+
   }
 
 
@@ -172,6 +172,7 @@ class App extends Component {
     const viewArea = this.state.mode === 'table'
       ? (<ResultTable records={this.state.records} />)
       : (<Charts
+        disableDetails={true}
         totalClaims={this.state.totalClaims}
         uniqueClaims={this.state.uniqueClaims}
         chartData={this.state.chartData}
@@ -216,6 +217,7 @@ class App extends Component {
           getDetailTable={this.getDetailTable}
           detailCount={this.state.detailCount}
           detailTotalCount={this.state.detailTotalCount}
+          disableDetails={true}
         />
         <MultiEdit
           testMultiEdit={this.multiEdit}
