@@ -40,6 +40,11 @@
   flex-flow: row wrap;
 }
 
+.SingleChart {
+  box-sizing: border-box;
+  max-width:50%;
+}
+
 .Spacer {
   min-width: 50px;
 }

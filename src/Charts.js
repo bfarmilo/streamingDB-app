@@ -42,7 +42,7 @@ const Charts = (props: {
     <div className="ChartArea">
       <div className="SurvivalCharts">
         {props.chartData.map((item, idx) => (
-          <div key={`chart${item.index}`}>
+          <div className="SingleChart" key={`chart${item.index}`}>
             <h3>{item.title}</h3>
             <span className="customdropdown">
               <select name={`chart${item.index}`} id={item.index} onChange={props.selectChart} value={props.currentSelection[idx]}>
