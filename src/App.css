@@ -42,7 +42,7 @@
 
 .SingleChart {
   box-sizing: border-box;
-  max-width:50%;
+  min-width:50%;
 }
 
 .Spacer {
