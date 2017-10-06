@@ -20,9 +20,9 @@ const ResultTable = (props: {
             <th>Patent Owner</th>
             <th>Patent:Claim</th>
             <th>Main USPC</th>
-            <th>Instituted</th>
-            <th>Invalid</th>
-            <th>Result</th>
+            <th>Inst.</th>
+            <th>Inv.</th>
+            <th>Survival</th>
           </tr>
         </thead>
         <tbody>
