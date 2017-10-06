@@ -22,6 +22,7 @@ const ResultTable = (props: {
             <th>Main USPC</th>
             <th>Instituted</th>
             <th>Invalid</th>
+            <th>Result</th>
           </tr>
         </thead>
         <tbody>
@@ -37,6 +38,7 @@ const ResultTable = (props: {
               <td>{record.MainUSPC}</td>
               <td>{record.Instituted === '1' ? 'x' : ''}</td>
               <td>{record.Invalid === '1' ? 'x' : ''}</td>
+              <td>{record.survivalStatus}</td>
             </tr>
           )}
         </tbody>
