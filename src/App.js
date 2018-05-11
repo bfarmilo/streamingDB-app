@@ -1,188 +1,31 @@
 //@flow
 
 import React, { Component } from 'react';
-import ControlArea from './ControlArea';
-import ResultTable from './ResultTable';
-import Charts from './Charts';
-import MultiEdit from './MultiEdit';
 import './App.css';
 
-const baseUrl = "https://ptab-server.azurewebsites.net";
-const userID = Math.round(Math.random() * 1000);
+const baseUrl = 'http://localhost:3000'; //"https://ptab-server.azurewebsites.net";
+//const userID = Math.round(Math.random() * 1000);
 
 class App extends Component {
   state = {
-    records: [],
-    field: "PatentOwner",
-    value: "Personalized",
-    table: "FWDStatus:unpatentable",
+    collection: 'categories',
     fields: [],
-    tables: [],
-    count: 0,
-    totalCount: 0,
-    totalClaims: [],
-    uniqueClaims: [],
-    chartData: [],
-    chartTitle: ['all', 'patentownertype:lawfirm'],
-    mode: 'chart',
-    goButton: true,
-    cursor: 0,
-    detailTable: 'out:i_w',
-    details: [],
-    detailCursor: 0,
-    detailCount: 0,
-    detailTotalCount: 0,
-    detailGoButton: true,
-    spinner: true,
-    disableDetails: true
+    spinner: false
   }
 
-  componentDidMount() {
-    fetch(`${baseUrl}/fields?user=${userID}`)
-      .then(res => res.json())
-      .then(fields => this.setState({ fields }))
-    fetch(`${baseUrl}/tables?user=${userID}`)
-      .then(res => res.json())
-      .then(tables => this.setState({ tables }))
-    fetch(`${baseUrl}/run?user=${userID}&field=${this.state.field}&value=${this.state.value}&cursor=${this.state.cursor}&table=${encodeURIComponent(this.state.table)}`)
-      .then(res => res.json())
-      .then(records => {
-        this.setState({ cursor: records.cursor, count: records.count, records: records.data, totalCount: records.totalCount })
-      })
-    return Promise.all(this.state.chartTitle.map((table, index) => {
-      return fetch(`${baseUrl}/survival?user=${userID}&table=${encodeURIComponent(table)}&chart=${index}`)
-        .then(res => res.json())
-    }))
-      .then(results => {
-        const chartData = [].concat(...results.map((item, idx) => {
-          return [{ title: `${item.title} - with Duplicates`, index: (idx + 1) * 2 - 1, count: item.countTotal, data: item.survivalTotal }]
-            .concat([{ title: `${item.title} - unique only`, index: (idx + 1) * 2, count: item.countUnique, data: item.survivalUnique }])
-        }))
-        console.log('got initial chart Data\n%j', chartData);
-        this.setState({ chartData, spinner: false })
-      })
-  }
-
-  setDetailTable = (event) => {
-    console.log('new detail table selected %s', event.target.value);
-    this.setState({ detailTable: event.target.value, detailGoButton: true });
-  }
-
-  selectChart = (event) => {
-    console.log('changing %s to %s, chart %d', event.target.name, event.target.value, parseInt(event.target.id, 10) - 1);
-    // set chartTitle to update the screen and the spinner
-    const newTitle = this.state.chartTitle.map((item, index) => {
-      let changeIdx = parseInt(event.target.id, 10) <= 2 ? 0 : 1;
-      if (changeIdx === index) return event.target.value;
-      return item;
-    });
-    this.setState({ spinner: true, chartTitle: newTitle });
-    // fetch the new chart data
-    Promise.all(newTitle.map((table, index) => {
-      return fetch(`${baseUrl}/survival?user=${userID}&table=${encodeURIComponent(table)}&chart=${index}`)
-        .then(res => res.json())
-    }))
-      .then(results => {
-        const chartData = [].concat(...results.map((item, idx) => {
-          return [{ title: `${item.title} - with Duplicates`, index: (idx + 1) * 2 - 1, count: item.countTotal, data: item.survivalTotal }]
-            .concat([{ title: `${item.title} - unique only`, index: (idx + 1) * 2, count: item.countUnique, data: item.survivalUnique }])
-        }))
-        console.log('got new chart Data\n%j', chartData);
-        // set chartData and spinner:false
-        this.setState({ chartData, spinner: false })
-      })
-
-  }
-
-
-  selectTable = (event) => {
-    console.log('new table selected %s', event.target.value);
-    this.setState({ table: event.target.value, goButton: true });
-  }
-
-  selectField = (event) => {
-    console.log('new field selected %s', event.target.value);
-    this.setState({ field: event.target.value, goButton: true });
-  }
-
-  setValue = (event) => {
-    console.log('new value %s', event.target.value);
-    this.setState({ value: event.target.value, goButton: true });
-  }
-
-  getDetailTable = () => {
-    this.setState({ spinner: true })
-    const cursor = this.state.detailGoButton ? 0 : this.state.detailCursor;
-    fetch(`${baseUrl}/survivaldetail?user=${userID}&table=${encodeURIComponent(this.state.detailTable)}&cursor=${cursor}`)
-      .then(res => res.json())
-      .then(result => {
-        console.log(result);
-        this.setState(oldState => {
-          return {
-            detailCount: oldState.detailGoButton ? result.count : oldState.detailCount + result.count,
-            details: oldState.detailGoButton ? result.data : oldState.details.concat(result.data),
-            detailTotalCount: result.totalCount,
-            cursor: result.cursor,
-            detailGoButton: result.cursor === 0,
-            spinner: false
-          }
-        });
-      })
-  }
-
-  multiEdit = () => {
-    fetch(`${baseUrl}/multiedit?user=${userID}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ rows: ['66804'], field: 'PatentOwner', newValue: 'Personalized Media Communications (npe)' })
-    })
-      .then(res => res.json())
-      .then(result => console.log(result));
+  async componentDidMount() {
+    const response = await fetch(`${baseUrl}/test?collection=${this.state.collection}`);
+    const fields = await response.json();
+    console.log(fields);
+    this.setState({ fields });
   }
 
   newQuery = () => {
     this.setState({ spinner: true });
-    const cursor = this.state.goButton ? 0 : this.state.cursor;
-    console.log('request for new query of %s where %s=%s', this.state.table, this.state.field, this.state.value)
-    fetch(`${baseUrl}/run?user=${userID}&field=${this.state.field}&value=${this.state.value}&cursor=${cursor}&table=${encodeURIComponent(this.state.table)}`)
-      .then(res => res.json())
-      .then(records => {
-        this.setState(oldState => {
-          return {
-            count: oldState.goButton ? records.count : oldState.count + records.count,
-            totalCount: records.totalCount,
-            records: oldState.goButton ? records.data : oldState.records.concat(records.data),
-            cursor: records.cursor,
-            goButton: records.cursor === 0,
-            spinner: false
-          }
-        });
-      });
-  }
-
-  switchMode = () => {
-    console.log('request for mode switch');
-    let mode = this.state.mode;
-    mode === 'table' ? mode = 'chart' : mode = 'table';
-    this.setState({ mode });
   }
 
   render() {
-    const viewArea = this.state.mode === 'table'
-      ? (<ResultTable records={this.state.records} />)
-      : (<Charts
-        disableDetails={this.state.disableDetails}
-        totalClaims={this.state.totalClaims}
-        uniqueClaims={this.state.uniqueClaims}
-        chartData={this.state.chartData}
-        details={this.state.details}
-        availableTables={this.state.tables}
-        selectChart={this.selectChart}
-        currentSelection={[].concat(...this.state.chartTitle.map(item => [item, item]))}
-      />)
-    const logo = this.state.spinner ? (
+    const viewArea = this.state.spinner ? (
       <modal className="logo-background">
         <div className="App-logo">
           <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 841.9 595.3">
@@ -194,36 +37,17 @@ class App extends Component {
           </svg>
         </div>
       </modal>
-    ) : <div />
+    ) : (
+        <div className="Result">
+          <ul>
+            {this.state.fields.map(field => (
+              <li key={field}>{field}</li>
+            ))}
+          </ul>
+        </div>
+      )
     return (
       <div className="App">
-        <ControlArea
-          value={this.state.value}
-          tables={this.state.tables}
-          fields={this.state.fields}
-          table={this.state.table}
-          field={this.state.field}
-          count={this.state.count}
-          totalCount={this.state.totalCount}
-          mode={this.state.mode}
-          selectTable={this.selectTable}
-          selectField={this.selectField}
-          newQuery={this.newQuery}
-          setValue={this.setValue}
-          switchMode={this.switchMode}
-          goButton={this.state.goButton}
-          detailGoButton={this.state.detailGoButton}
-          detailTable={this.state.detailTable}
-          setDetailTable={this.setDetailTable}
-          getDetailTable={this.getDetailTable}
-          detailCount={this.state.detailCount}
-          detailTotalCount={this.state.detailTotalCount}
-          disableDetails={this.state.disableDetails}
-        />
-        <MultiEdit
-          testMultiEdit={this.multiEdit}
-        />
-        {logo}
         {viewArea}
       </div>
     );
