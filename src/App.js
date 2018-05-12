@@ -10,14 +10,20 @@ class App extends Component {
   state = {
     collection: 'categories',
     fields: [],
-    spinner: false
+    spinner: true,
+    serverError: ''
   }
 
   async componentDidMount() {
-    const response = await fetch(`${baseUrl}/test?collection=${this.state.collection}`);
-    const fields = await response.json();
-    console.log(fields);
-    this.setState({ fields });
+    try {
+      const response = await fetch(`${baseUrl}/test?collection=${this.state.collection}`);
+      const fields = await response.json();
+      console.log(fields);
+      this.setState({ fields, spinner: false });
+    } catch (error) {
+      console.log(error);
+      this.setState({ serverError:error.message, spinner: false })
+    }
   }
 
   newQuery = () => {
@@ -25,7 +31,7 @@ class App extends Component {
   }
 
   render() {
-    const viewArea = this.state.spinner ? (
+    const spinnerArea = this.state.spinner ? (
       <modal className="logo-background">
         <div className="App-logo">
           <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 841.9 595.3">
@@ -37,6 +43,11 @@ class App extends Component {
           </svg>
         </div>
       </modal>
+    ) : (<div />);
+    const viewArea = this.state.serverError ? (
+      <div className="Result">
+        {this.state.serverError}
+      </div>
     ) : (
         <div className="Result">
           <ul>
@@ -48,6 +59,7 @@ class App extends Component {
       )
     return (
       <div className="App">
+        {spinnerArea}
         {viewArea}
       </div>
     );
